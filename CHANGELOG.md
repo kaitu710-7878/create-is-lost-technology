@@ -4,6 +4,38 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.5-beta] - 2026-11-11
+
+### English
+#### Added
+- **Full Forge Item Tag Integration**:
+  - Bundled complete set of Forge item tag definitions under `data/forge/tags/items/` covering:
+    - Redstone & Dusts (`forge:dusts/redstone`, `forge:dusts`)
+    - Metal Ingots (`forge:ingots/copper`, `iron`, `gold`, `brass`, `zinc`, `ingots`)
+    - Metal Plates / Sheets (`forge:plates/copper`, `iron`, `gold`, `brass`, `obsidian`, `cardboard`, `plates`)
+    - Stones (`forge:stone`, `forge:cobblestone`)
+    - Storage Blocks (`forge:storage_blocks/iron`, `copper`, `gold`, `brass`, `zinc`, `redstone`)
+    - Nuggets (`forge:nuggets/iron`, `gold`, `copper`, `brass`, `zinc`)
+    - Glass, Rods, Slimeballs, Strings, Netherrack, and 16 Dye colors
+  - Completely fixes "Missing Tag" errors on Redstone logistics (Pulse Repeaters, Pulse Extenders, etc.), fluid pipes, and metal pressing recipes.
+
+---
+
+### 日本語
+#### 追加
+- **Forgeアイテムタグの自前完全付与・同梱**:
+  - バニラおよびCreateアイテムをForge共通タグへマッピングする50種類以上のタグ定義ファイルを `data/forge/tags/items/` に完全同梱：
+    - レッドストーン系ダスト (`forge:dusts/redstone`, `forge:dusts`)
+    - 金属インゴット (`forge:ingots/copper`, `iron`, `gold`, `brass`, `zinc`, `ingots`)
+    - プレート／シート (`forge:plates/copper`, `iron`, `gold`, `brass`, `obsidian`, `cardboard`, `plates`)
+    - 石材系 (`forge:stone`, `forge:cobblestone`)
+    - 金属・鉱石ブロック (`forge:storage_blocks/iron`, `copper`, `gold`, `brass`, `zinc`, `redstone`)
+    - ナゲット (`forge:nuggets/iron`, `gold`, `copper`, `brass`, `zinc`)
+    - ガラス、棒、スライムボール、糸、ネザーラック、および16色の全染料タグ
+  - これにより、パルスリピーター等のレッドストーン装置、流体パイプ、金属プレート作成レシピ（Pressing）で発生していたミッシングタグを根本から解消。
+
+---
+
 ## [1.0.4-beta] - 2026-11-11
 
 ### English
