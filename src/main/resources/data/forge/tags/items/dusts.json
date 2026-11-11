@@ -1,8 +1,0 @@
-{
-  "replace": false,
-  "values": [
-    "#forge:dusts/redstone",
-    "minecraft:redstone",
-    "minecraft:glowstone_dust"
-  ]
-}

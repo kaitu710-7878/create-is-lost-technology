@@ -4,6 +4,32 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.6-beta] - 2026-11-11
+
+### English
+#### Changed & Redesigned
+- **Purged Redundant Datapack Tag Files**:
+  - Removed all manually bundled tag JSON files under `data/forge/tags/items/` in favor of pure Java-level dynamic evaluation.
+- **Root-Cause BARRIER Detection for Missing Tags**:
+  - Discovered that Minecraft Forge internally injects `Blocks.BARRIER` with hover name "Empty tag: <tag>" into ingredients when a tag has zero valid items.
+  - Upgraded `hasEmptyOrMissingIngredient(recipe)` to explicitly detect Forge's barrier injection, immediately recognizing and purging any recipe requiring absent tags (such as Redstone logistics, fluid pipes, and metal pressing recipes where materials are uncraftable/unregistered).
+- **Direct JEI Recipe Interception (`JeiRecipeFilterMixin`)**:
+  - Added `@Pseudo` Mixin into `mezz.jei.library.recipes.RecipeManagerInternal.addRecipes` to filter out lost technology and missing-tag recipes at the exact entry point where JEI collects recipes, rendering them 100% invisible in JEI while keeping normal Forge recipes safe.
+
+---
+
+### 日本語
+#### 変更・根本再設計
+- **余剰なデータパックタグ定義の完全削除**:
+  - データパックによるタグの埋め合わせ（`data/forge/tags/items/`）を全削除し、完全な Java ロジックによる動的解決へ回帰。
+- **Forge の BARRIER 注入検知によるミッシングタグの根絶**:
+  - Minecraft Forge が空タグ・未バインドタグに対して内部で「Empty tag: <tag名>」と名付けた `Blocks.BARRIER`（バリアブロック）のダミースタックを生成し、これが JEI 上でミッシングタグ警告となっていた根本原因を特定。
+  - `hasEmptyOrMissingIngredient(recipe)` において `Blocks.BARRIER` / `Items.BARRIER` の検出ロジックを実装。素材が実在しないアイテム・空タグであるレシピを自動的かつ完全に特定・パージ。
+- **JEI レシピ直接遮断 Mixin (`JeiRecipeFilterMixin`) の導入**:
+  - JEI が全MODからレシピを受け取る大元である `RecipeManagerInternal.addRecipes` に対する Mixin を導入。作業台での使用不可能化だけでなく、JEI へのレシピ登録時点でも完全に除外し、一切表示されないよう恒久対処。
+
+---
+
 ## [1.0.5-beta] - 2026-11-11
 
 ### English

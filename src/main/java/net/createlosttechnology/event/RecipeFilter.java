@@ -14,6 +14,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.block.Blocks;
 
 import java.util.*;
 
@@ -85,7 +86,7 @@ public class RecipeFilter {
     );
 
     /**
-     * Purges invalid and lost technology recipes from a given RecipeManager instance.
+     * Purges invalid, missing tag, and lost technology recipes from a given RecipeManager instance.
      *
      * @param manager The RecipeManager to clean
      * @return Number of recipes purged
@@ -144,13 +145,13 @@ public class RecipeFilter {
             return false;
         }
 
-        // --- RULE 1: ROOT-CAUSE FIX ---
-        // Purge any recipe that has empty, unresolvable, or missing ingredients (eliminates "Missing Tag" in JEI)
+        // --- RULE 1: ROOT-CAUSE FIX FOR MISSING TAGS ---
+        // Purge any recipe that has empty tags, unbound tags, or missing ingredients (detected via Forge's BARRIER injection)
         if (ModConfig.PURGE_BROKEN_RECIPES.get() && hasEmptyOrMissingIngredient(recipe)) {
             return true;
         }
 
-        // --- RULE 2: IDENTIFIER HEURISTICS ---
+        // --- RULE 2: IDENTIFIER HEURISTICS FOR LOST TECH ---
         ResourceLocation recipeId = recipe.getId();
         if (recipeId != null && "create".equals(recipeId.getNamespace())) {
             String path = recipeId.getPath();
@@ -194,7 +195,13 @@ public class RecipeFilter {
         try {
             ItemStack resultStack = recipe.getResultItem(RegistryAccess.EMPTY);
             if (!resultStack.isEmpty()) {
-                ResourceLocation resultId = BuiltInRegistries.ITEM.getKey(resultStack.getItem());
+                Item resultItem = resultStack.getItem();
+                // Purge if output is a barrier block (missing output item)
+                if (resultItem == Items.BARRIER || resultItem == Blocks.BARRIER.asItem() || resultItem == Items.AIR) {
+                    return true;
+                }
+
+                ResourceLocation resultId = BuiltInRegistries.ITEM.getKey(resultItem);
                 if (resultId != null) {
                     if (ModConfig.DISABLE_ANDESITE_ALLOY_RECIPES.get() && ANDESITE_ALLOY_ITEMS.contains(resultId)) {
                         return true;
@@ -245,7 +252,10 @@ public class RecipeFilter {
                             ItemStack[] matchingStacks = ingredient.getItems();
                             for (ItemStack stack : matchingStacks) {
                                 if (stack == null || stack.isEmpty()) continue;
-                                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                                Item item = stack.getItem();
+                                if (item == Items.BARRIER || item == Blocks.BARRIER.asItem() || item == Items.AIR) continue;
+
+                                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(item);
                                 if (itemId == null) continue;
 
                                 if (checkAlloy && ANDESITE_ALLOY_ITEMS.contains(itemId)) {
@@ -283,8 +293,9 @@ public class RecipeFilter {
     }
 
     /**
-     * Checks if a recipe contains any ingredient that resolves to no items or empty tags.
-     * This is the exact root cause of "Missing Tag" warnings in JEI.
+     * Checks if a recipe contains any ingredient that resolves to no items, empty tags, or BARRIER items.
+     * In Minecraft Forge, an empty/missing tag produces an ItemStack of Blocks.BARRIER named "Empty tag: ...".
+     * Detecting this eliminates 100% of "Missing Tag" warnings in JEI without hardcoding item lists.
      */
     public static boolean hasEmptyOrMissingIngredient(Recipe<?> recipe) {
         if (recipe == null) return false;
@@ -306,15 +317,20 @@ public class RecipeFilter {
                     return true;
                 }
 
-                boolean hasValidItem = false;
+                boolean hasValidRealItem = false;
                 for (ItemStack stack : items) {
-                    if (stack != null && !stack.isEmpty() && stack.getItem() != Items.AIR) {
-                        hasValidItem = true;
-                        break;
+                    if (stack != null && !stack.isEmpty()) {
+                        Item item = stack.getItem();
+                        // Forge injects Blocks.BARRIER when a tag is empty/missing!
+                        if (item != Items.AIR && item != Items.BARRIER && item != Blocks.BARRIER.asItem()) {
+                            hasValidRealItem = true;
+                            break;
+                        }
                     }
                 }
 
-                if (!hasValidItem) {
+                // If ingredient only resolves to BARRIER or nothing, it is an empty/missing tag
+                if (!hasValidRealItem) {
                     return true;
                 }
             } catch (Exception e) {

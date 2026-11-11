@@ -7,6 +7,7 @@
   "mixins": [
     "RecipeManagerMixin",
     "RecipeManagerAccessor",
+    "JeiRecipeFilterMixin",
     "PlacedFeatureMixin"
   ],
   "client": [
