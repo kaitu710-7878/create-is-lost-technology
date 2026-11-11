@@ -6,6 +6,7 @@
   "refmap": "create_lost_technology.refmap.json",
   "mixins": [
     "RecipeManagerMixin",
+    "RecipeManagerAccessor",
     "PlacedFeatureMixin"
   ],
   "client": [

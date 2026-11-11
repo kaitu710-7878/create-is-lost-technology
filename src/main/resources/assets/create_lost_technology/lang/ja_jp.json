@@ -6,5 +6,6 @@
   "config.create_lost_technology.disableCogwheelRecipes": "歯車レシピを無効化",
   "config.create_lost_technology.disableAndesiteCasingRecipes": "安山岩ケーシングレシピを無効化",
   "config.create_lost_technology.disableMachineRecipes": "機械レシピを無効化",
+  "config.create_lost_technology.purgeBrokenRecipes": "空タグ・破損レシピを自動パージ",
   "config.create_lost_technology.showLostTechTooltip": "失われた技術ツールチップを表示"
 }

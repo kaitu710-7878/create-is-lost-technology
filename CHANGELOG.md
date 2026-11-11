@@ -4,6 +4,28 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.4-beta] - 2026-11-11
+
+### English
+#### Added
+- **Fundamental Root-Cause Logic for "Missing Tag" Prevention**:
+  - Implemented dynamic ingredient evaluation `hasEmptyOrMissingIngredient(recipe)` that scans every ingredient across all recipe types. If any ingredient specifies an empty tag, unresolvable tag, or contains zero valid non-air items, the recipe is immediately purged as an invalid/broken recipe.
+  - Eliminated the need for hardcoded per-item blacklists for broken tag recipes (such as Pulse Repeaters, Pressing recipes for absent metals, etc.).
+  - Added `purgeBrokenRecipes` configuration toggle (default: `true`).
+  - Added client-side listener for `RecipesUpdatedEvent` with `RecipeManagerAccessor` to re-purge recipes once all game tags are 100% bound, preventing any desynchronized tags from ever reaching JEI.
+
+---
+
+### 日本語
+#### 追加・根本改修
+- **ミッシングタグ不具合を恒久防止する「根本ロジック」の導入**:
+  - 個別アイテムのリスト追加（対処療法）を廃止し、あらゆるレシピタイプの全素材を動的に走査する `hasEmptyOrMissingIngredient(recipe)` を実装。空のタグ、未解決のタグ、または有効なアイテムが0件のIngredientを要求するレシピを「破損・不完全レシピ」として100%自動パージする根本ロジックを確立。
+  - パルスリピーターや、環境に存在しない金属インゴットのプレート作成レシピ（Pressing）など、空タグを含むレシピがJEIにミッシングタグとして表示される問題を完全に一掃。
+  - `purgeBrokenRecipes` コンフィグオプション（デフォルト: `true`）を追加。
+  - クライアント側でタグが100%確定した瞬間に発火する `RecipesUpdatedEvent` および `RecipeManagerAccessor` を導入し、JEIがレシピを構築する直前に完璧なクリーンアップを実行。
+
+---
+
 ## [1.0.3-beta] - 2026-11-11
 
 ### English

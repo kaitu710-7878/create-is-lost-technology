@@ -6,12 +6,19 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 @Mod.EventBusSubscriber(modid = CreateLostTechnology.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class ClientEvents {
+
+    @SubscribeEvent
+    public static void onRecipesUpdated(RecipesUpdatedEvent event) {
+        CreateLostTechnology.LOGGER.info("[Create is Lost Technology] RecipesUpdatedEvent received, purging invalid and lost tech recipes on client...");
+        RecipeFilter.purgeRecipeManager(event.getRecipeManager());
+    }
 
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event) {

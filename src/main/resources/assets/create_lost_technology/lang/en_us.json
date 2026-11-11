@@ -6,5 +6,6 @@
   "config.create_lost_technology.disableCogwheelRecipes": "Disable Cogwheel Recipes",
   "config.create_lost_technology.disableAndesiteCasingRecipes": "Disable Andesite Casing Recipes",
   "config.create_lost_technology.disableMachineRecipes": "Disable Machine Recipes",
+  "config.create_lost_technology.purgeBrokenRecipes": "Purge Broken & Missing Tag Recipes",
   "config.create_lost_technology.showLostTechTooltip": "Show Lost Technology Tooltip"
 }

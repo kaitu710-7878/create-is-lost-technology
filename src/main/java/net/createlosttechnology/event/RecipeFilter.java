@@ -1,14 +1,19 @@
 package net.createlosttechnology.event;
 
+import com.google.common.collect.ImmutableMap;
 import net.createlosttechnology.CreateLostTechnology;
 import net.createlosttechnology.config.ModConfig;
+import net.createlosttechnology.mixin.RecipeManagerAccessor;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeType;
 
 import java.util.*;
 
@@ -80,25 +85,78 @@ public class RecipeFilter {
     );
 
     /**
-     * Checks whether a recipe should be removed/disabled based on configuration rules.
+     * Purges invalid and lost technology recipes from a given RecipeManager instance.
+     *
+     * @param manager The RecipeManager to clean
+     * @return Number of recipes purged
+     */
+    public static int purgeRecipeManager(RecipeManager manager) {
+        if (manager == null) {
+            return 0;
+        }
+
+        RecipeManagerAccessor accessor = (RecipeManagerAccessor) manager;
+        Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> originalRecipes = accessor.getRecipes();
+        if (originalRecipes == null) {
+            return 0;
+        }
+
+        int removedCount = 0;
+        Map<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> newRecipesByType = new HashMap<>();
+        Map<ResourceLocation, Recipe<?>> newByName = new HashMap<>();
+
+        for (Map.Entry<RecipeType<?>, Map<ResourceLocation, Recipe<?>>> typeEntry : originalRecipes.entrySet()) {
+            RecipeType<?> type = typeEntry.getKey();
+            Map<ResourceLocation, Recipe<?>> originalMap = typeEntry.getValue();
+            Map<ResourceLocation, Recipe<?>> filteredMap = new HashMap<>();
+
+            for (Map.Entry<ResourceLocation, Recipe<?>> recipeEntry : originalMap.entrySet()) {
+                ResourceLocation id = recipeEntry.getKey();
+                Recipe<?> recipe = recipeEntry.getValue();
+
+                if (shouldDisableRecipe(recipe)) {
+                    removedCount++;
+                    CreateLostTechnology.LOGGER.debug("[Create is Lost Technology] Purged recipe: {}", id);
+                } else {
+                    filteredMap.put(id, recipe);
+                    newByName.put(id, recipe);
+                }
+            }
+
+            newRecipesByType.put(type, ImmutableMap.copyOf(filteredMap));
+        }
+
+        accessor.setRecipes(ImmutableMap.copyOf(newRecipesByType));
+        accessor.setByName(ImmutableMap.copyOf(newByName));
+
+        CreateLostTechnology.LOGGER.info("[Create is Lost Technology] Successfully purged {} recipes from RecipeManager.", removedCount);
+        return removedCount;
+    }
+
+    /**
+     * Core decision engine: whether a recipe should be disabled/purged.
      *
      * @param recipe The recipe to inspect
-     * @return true if the recipe should be removed, false if it is allowed
+     * @return true if the recipe must be purged, false if allowed
      */
     public static boolean shouldDisableRecipe(Recipe<?> recipe) {
         if (recipe == null) {
             return false;
         }
 
-        // 1. Fast check by Recipe ID
+        // --- RULE 1: ROOT-CAUSE FIX ---
+        // Purge any recipe that has empty, unresolvable, or missing ingredients (eliminates "Missing Tag" in JEI)
+        if (ModConfig.PURGE_BROKEN_RECIPES.get() && hasEmptyOrMissingIngredient(recipe)) {
+            return true;
+        }
+
+        // --- RULE 2: IDENTIFIER HEURISTICS ---
         ResourceLocation recipeId = recipe.getId();
         if (recipeId != null && "create".equals(recipeId.getNamespace())) {
             String path = recipeId.getPath();
-            // Andesite casing application in-world / manual
             if (ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get() && path.contains("andesite_casing")) {
                 return true;
             }
-            // Machine / Chassis / Gantry crafting
             if (ModConfig.DISABLE_MACHINE_RECIPES.get() || ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get()) {
                 if (path.startsWith("crafting/kinetics/mechanical_")
                         || path.contains("chassis")
@@ -124,18 +182,16 @@ public class RecipeFilter {
                     return true;
                 }
             }
-            // Cogwheel recipes
             if (ModConfig.DISABLE_COGWHEEL_RECIPES.get() && (path.contains("cogwheel") || path.contains("large_cogwheel"))) {
                 return true;
             }
-            // Andesite alloy recipes
             if (ModConfig.DISABLE_ANDESITE_ALLOY_RECIPES.get() && path.contains("andesite_alloy")) {
                 return true;
             }
         }
 
+        // --- RULE 3: RESULT ITEM (OUTPUT) CHECK ---
         try {
-            // 2. Check Result Item
             ItemStack resultStack = recipe.getResultItem(RegistryAccess.EMPTY);
             if (!resultStack.isEmpty()) {
                 ResourceLocation resultId = BuiltInRegistries.ITEM.getKey(resultStack.getItem());
@@ -169,7 +225,7 @@ public class RecipeFilter {
             CreateLostTechnology.LOGGER.debug("Could not inspect result for recipe {}: {}", recipe.getId(), e.getMessage());
         }
 
-        // 3. Check Ingredients (Materials) safely per ingredient
+        // --- RULE 4: INGREDIENTS (INPUT MATERIALS) CHECK ---
         try {
             List<Ingredient> ingredients = recipe.getIngredients();
             if (ingredients != null && !ingredients.isEmpty()) {
@@ -188,7 +244,7 @@ public class RecipeFilter {
                         try {
                             ItemStack[] matchingStacks = ingredient.getItems();
                             for (ItemStack stack : matchingStacks) {
-                                if (stack.isEmpty()) continue;
+                                if (stack == null || stack.isEmpty()) continue;
                                 ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
                                 if (itemId == null) continue;
 
@@ -221,6 +277,50 @@ public class RecipeFilter {
             }
         } catch (Exception e) {
             CreateLostTechnology.LOGGER.debug("Could not inspect ingredients for recipe {}: {}", recipe.getId(), e.getMessage());
+        }
+
+        return false;
+    }
+
+    /**
+     * Checks if a recipe contains any ingredient that resolves to no items or empty tags.
+     * This is the exact root cause of "Missing Tag" warnings in JEI.
+     */
+    public static boolean hasEmptyOrMissingIngredient(Recipe<?> recipe) {
+        if (recipe == null) return false;
+        List<Ingredient> ingredients = recipe.getIngredients();
+        if (ingredients == null || ingredients.isEmpty()) {
+            return false;
+        }
+
+        for (Ingredient ingredient : ingredients) {
+            if (ingredient == null) continue;
+
+            if (ingredient.isEmpty()) {
+                return true;
+            }
+
+            try {
+                ItemStack[] items = ingredient.getItems();
+                if (items == null || items.length == 0) {
+                    return true;
+                }
+
+                boolean hasValidItem = false;
+                for (ItemStack stack : items) {
+                    if (stack != null && !stack.isEmpty() && stack.getItem() != Items.AIR) {
+                        hasValidItem = true;
+                        break;
+                    }
+                }
+
+                if (!hasValidItem) {
+                    return true;
+                }
+            } catch (Exception e) {
+                // If resolving ingredient throws an error (e.g. tag unbound or corrupted), it's a broken ingredient
+                return true;
+            }
         }
 
         return false;
