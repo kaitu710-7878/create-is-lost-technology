@@ -4,6 +4,24 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.1-beta] - 2026-11-11
+
+### English
+#### Fixed
+- **Fixed Crash on World Loading/Creation**:
+  - Removed invalid reference to non-existent placed feature `create:deepslate_zinc_ore` in `remove_zinc_ores.json`, which caused an `IllegalStateException: Unbound values in registry [create:deepslate_zinc_ore]`.
+  - Added direct override for `data/create/forge/biome_modifier/zinc_ore.json` with `forge:none` to safely suppress Create's zinc ore injection at the source.
+
+---
+
+### 日本語
+#### 修正
+- **ワールド読み込み／作成時のクラッシュを修正**:
+  - `remove_zinc_ores.json` 内に存在しない placed feature である `create:deepslate_zinc_ore` が記述されていたため、レジストリ読み込み時に `IllegalStateException: Unbound values in registry [create:deepslate_zinc_ore]` が発生していた問題を修正。
+  - Create 本体の `data/create/forge/biome_modifier/zinc_ore.json` を `forge:none` で安全にオーバーライドし、Createによる亜鉛鉱石のバイオーム追加処理を元から完全に無効化。
+
+---
+
 ## [1.0.0-beta] - 2026-11-11
 
 ### English
