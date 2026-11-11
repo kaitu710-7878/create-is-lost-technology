@@ -4,6 +4,21 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.2-beta] - 2026-11-11
+
+### English
+#### Added
+- **Comprehensive Machine Crafting Disabler**:
+  - Completely purged recipes for all Create kinetic machines (Mechanical Press, Mechanical Mixer, Mechanical Saw, Mechanical Drill, Mechanical Harvester, Mechanical Plough, Mechanical Roller, Deployer, Encased Fan, Millstone, Crushing Wheel, Gearbox, Clutch, Gearshift, Rope Pulley, Windmill Bearing, Mechanical Bearing, Speedometer, Stressometer, Encased Chain Drive, Water Wheels, etc.).
+  - Added new configuration toggle `disableMachineRecipes` (defaults to `true`).
+  - Added machine items to the "Lost Technology" tooltip registry so JEI and inventory hover clearly displays their uncraftable relic status.
+#### Fixed
+- **Fixed Missing Tags in JEI & Recipe Inspection**:
+  - Tag resolution during early recipe loading could fail on unbound forge tags (e.g. `forge:plates/iron`, `forge:storage_blocks/iron`), interrupting recipe filtering and leaving broken machine recipes visible in JEI with "Missing Tag" warnings.
+  - Implemented multi-layered fast identification using direct recipe resource IDs, item registry IDs, and per-ingredient isolated error handling to guarantee all machine recipes are removed without relying on tag binding order.
+
+---
+
 ## [1.0.1-beta] - 2026-11-11
 
 ### English

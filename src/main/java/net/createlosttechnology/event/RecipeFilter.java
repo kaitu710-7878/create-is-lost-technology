@@ -25,6 +25,53 @@ public class RecipeFilter {
 
     public static final ResourceLocation ANDESITE_CASING = new ResourceLocation("create", "andesite_casing");
 
+    public static final Set<ResourceLocation> KINETIC_MACHINES = Set.of(
+            // Andesite Casing machines
+            new ResourceLocation("create", "mechanical_press"),
+            new ResourceLocation("create", "mechanical_mixer"),
+            new ResourceLocation("create", "mechanical_saw"),
+            new ResourceLocation("create", "mechanical_drill"),
+            new ResourceLocation("create", "mechanical_harvester"),
+            new ResourceLocation("create", "mechanical_plough"),
+            new ResourceLocation("create", "mechanical_roller"),
+            new ResourceLocation("create", "deployer"),
+            new ResourceLocation("create", "encased_fan"),
+            new ResourceLocation("create", "millstone"),
+            new ResourceLocation("create", "rope_pulley"),
+            new ResourceLocation("create", "elevator_pulley"),
+            new ResourceLocation("create", "mechanical_piston"),
+            new ResourceLocation("create", "sticky_mechanical_piston"),
+            new ResourceLocation("create", "mechanical_bearing"),
+            new ResourceLocation("create", "windmill_bearing"),
+            new ResourceLocation("create", "clockwork_bearing"),
+            new ResourceLocation("create", "gearbox"),
+            new ResourceLocation("create", "vertical_gearbox"),
+            new ResourceLocation("create", "clutch"),
+            new ResourceLocation("create", "gearshift"),
+            new ResourceLocation("create", "speedometer"),
+            new ResourceLocation("create", "stressometer"),
+            new ResourceLocation("create", "encased_chain_drive"),
+            new ResourceLocation("create", "andesite_door"),
+            // Power generation & transmission
+            new ResourceLocation("create", "water_wheel"),
+            new ResourceLocation("create", "large_water_wheel"),
+            new ResourceLocation("create", "turntable"),
+            new ResourceLocation("create", "weighted_ejector"),
+            // Advanced machines
+            new ResourceLocation("create", "crushing_wheel"),
+            new ResourceLocation("create", "mechanical_arm"),
+            new ResourceLocation("create", "mechanical_crafter"),
+            new ResourceLocation("create", "sequenced_gearshift"),
+            new ResourceLocation("create", "rotation_speed_controller"),
+            new ResourceLocation("create", "spout"),
+            new ResourceLocation("create", "item_drain"),
+            new ResourceLocation("create", "hose_pulley"),
+            new ResourceLocation("create", "portable_storage_interface"),
+            new ResourceLocation("create", "portable_fluid_interface"),
+            new ResourceLocation("create", "smart_chute"),
+            new ResourceLocation("create", "chute")
+    );
+
     /**
      * Checks whether a recipe should be removed/disabled based on configuration rules.
      *
@@ -36,8 +83,49 @@ public class RecipeFilter {
             return false;
         }
 
+        // 1. Fast check by Recipe ID
+        ResourceLocation recipeId = recipe.getId();
+        if (recipeId != null && "create".equals(recipeId.getNamespace())) {
+            String path = recipeId.getPath();
+            // Andesite casing application in-world / manual
+            if (ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get() && path.contains("andesite_casing")) {
+                return true;
+            }
+            // Machine crafting
+            if (ModConfig.DISABLE_MACHINE_RECIPES.get() || ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get()) {
+                if (path.startsWith("crafting/kinetics/mechanical_")
+                        || path.equals("crafting/kinetics/deployer")
+                        || path.equals("crafting/kinetics/encased_fan")
+                        || path.equals("crafting/kinetics/millstone")
+                        || path.equals("crafting/kinetics/gearbox")
+                        || path.equals("crafting/kinetics/clutch")
+                        || path.equals("crafting/kinetics/gearshift")
+                        || path.equals("crafting/kinetics/rope_pulley")
+                        || path.equals("crafting/kinetics/elevator_pulley")
+                        || path.equals("crafting/kinetics/water_wheel")
+                        || path.equals("crafting/kinetics/large_water_wheel")
+                        || path.equals("crafting/kinetics/windmill_bearing")
+                        || path.equals("crafting/kinetics/mechanical_bearing")
+                        || path.equals("crafting/kinetics/clockwork_bearing")
+                        || path.equals("crafting/kinetics/speedometer")
+                        || path.equals("crafting/kinetics/stressometer")
+                        || path.equals("crafting/kinetics/encased_chain_drive")
+                        || path.startsWith("mechanical_crafting/crushing_wheel")) {
+                    return true;
+                }
+            }
+            // Cogwheel recipes
+            if (ModConfig.DISABLE_COGWHEEL_RECIPES.get() && (path.contains("cogwheel") || path.contains("large_cogwheel"))) {
+                return true;
+            }
+            // Andesite alloy recipes
+            if (ModConfig.DISABLE_ANDESITE_ALLOY_RECIPES.get() && path.contains("andesite_alloy")) {
+                return true;
+            }
+        }
+
         try {
-            // 1. Check Result Item
+            // 2. Check Result Item
             ItemStack resultStack = recipe.getResultItem(RegistryAccess.EMPTY);
             if (!resultStack.isEmpty()) {
                 ResourceLocation resultId = BuiltInRegistries.ITEM.getKey(resultStack.getItem());
@@ -51,6 +139,11 @@ public class RecipeFilter {
                     if (ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get() && ANDESITE_CASING.equals(resultId)) {
                         return true;
                     }
+                    if ((ModConfig.DISABLE_MACHINE_RECIPES.get() || ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get())
+                            && KINETIC_MACHINES.contains(resultId)) {
+                        return true;
+                    }
+
                     List<? extends String> customOutputs = ModConfig.CUSTOM_DISABLED_OUTPUT_ITEMS.get();
                     if (customOutputs != null && !customOutputs.isEmpty()) {
                         String idStr = resultId.toString();
@@ -62,44 +155,55 @@ public class RecipeFilter {
                     }
                 }
             }
+        } catch (Exception e) {
+            CreateLostTechnology.LOGGER.debug("Could not inspect result for recipe {}: {}", recipe.getId(), e.getMessage());
+        }
 
-            // 2. Check Ingredients (Materials)
+        // 3. Check Ingredients (Materials) safely per ingredient
+        try {
             List<Ingredient> ingredients = recipe.getIngredients();
             if (ingredients != null && !ingredients.isEmpty()) {
                 boolean checkCasing = ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get();
+                boolean checkMachines = ModConfig.DISABLE_MACHINE_RECIPES.get();
                 List<? extends String> customIngredients = ModConfig.CUSTOM_DISABLED_INGREDIENTS.get();
                 boolean hasCustom = customIngredients != null && !customIngredients.isEmpty();
 
-                if (checkCasing || hasCustom) {
+                if (checkCasing || checkMachines || hasCustom) {
                     for (Ingredient ingredient : ingredients) {
                         if (ingredient == null || ingredient.isEmpty()) {
                             continue;
                         }
-                        ItemStack[] matchingStacks = ingredient.getItems();
-                        for (ItemStack stack : matchingStacks) {
-                            if (stack.isEmpty()) continue;
-                            ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
-                            if (itemId == null) continue;
+                        try {
+                            ItemStack[] matchingStacks = ingredient.getItems();
+                            for (ItemStack stack : matchingStacks) {
+                                if (stack.isEmpty()) continue;
+                                ResourceLocation itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+                                if (itemId == null) continue;
 
-                            if (checkCasing && ANDESITE_CASING.equals(itemId)) {
-                                return true;
-                            }
-                            if (hasCustom) {
-                                String idStr = itemId.toString();
-                                for (String disabled : customIngredients) {
-                                    if (idStr.equals(disabled)) {
-                                        return true;
+                                if (checkCasing && ANDESITE_CASING.equals(itemId)) {
+                                    return true;
+                                }
+                                if (checkMachines && KINETIC_MACHINES.contains(itemId)) {
+                                    return true;
+                                }
+                                if (hasCustom) {
+                                    String idStr = itemId.toString();
+                                    for (String disabled : customIngredients) {
+                                        if (idStr.equals(disabled)) {
+                                            return true;
+                                        }
                                     }
                                 }
                             }
+                        } catch (Exception ingredientEx) {
+                            // Suppress individual ingredient tag resolution errors without dropping whole recipe check
+                            CreateLostTechnology.LOGGER.debug("Could not resolve ingredient in {}: {}", recipe.getId(), ingredientEx.getMessage());
                         }
                     }
                 }
             }
         } catch (Exception e) {
-            // Some specialized recipes might fail when getResultItem(RegistryAccess.EMPTY) is called without world context.
-            // Safely log in debug and ignore.
-            CreateLostTechnology.LOGGER.debug("Could not inspect recipe {}: {}", recipe.getId(), e.getMessage());
+            CreateLostTechnology.LOGGER.debug("Could not inspect ingredients for recipe {}: {}", recipe.getId(), e.getMessage());
         }
 
         return false;
@@ -119,6 +223,9 @@ public class RecipeFilter {
             return true;
         }
         if (ModConfig.DISABLE_ANDESITE_CASING_RECIPES.get() && ANDESITE_CASING.equals(id)) {
+            return true;
+        }
+        if (ModConfig.DISABLE_MACHINE_RECIPES.get() && KINETIC_MACHINES.contains(id)) {
             return true;
         }
 

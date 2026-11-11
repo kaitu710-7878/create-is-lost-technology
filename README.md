@@ -36,7 +36,7 @@ Create components and machines can no longer be mass-produced in a workshop; the
 - **Minecraft**: 1.20.1
 - **Mod Loader**: Minecraft Forge (>= 47.1.0)
 - **Dependency**: [Create](https://www.curseforge.com/minecraft/mc-mods/create) (recommended >= 0.5.1)
-- Drop `create_lost_technology-1.0.1-beta.jar` into your `.minecraft/mods` folder.
+- Drop `create_lost_technology-1.0.2-beta.jar` into your `.minecraft/mods` folder.
 
 ### License
 
@@ -74,7 +74,7 @@ Distributed under the **GNU General Public License v3.0 (GPL-3.0-or-later)**. Se
 - **Minecraft**: 1.20.1
 - **MODローダー**: Minecraft Forge (47.1.0 以上推奨)
 - **前提MOD**: [Create](https://www.curseforge.com/minecraft/mc-mods/create) (0.5.1 以上推奨)
-- ビルドされた `create_lost_technology-1.0.1-beta.jar` を `.minecraft/mods` フォルダに配置してください。
+- ビルドされた `create_lost_technology-1.0.2-beta.jar` を `.minecraft/mods` フォルダに配置してください。
 
 ### ライセンス
 

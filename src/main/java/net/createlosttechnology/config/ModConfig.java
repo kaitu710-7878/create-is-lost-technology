@@ -11,6 +11,7 @@ public class ModConfig {
     public static final ForgeConfigSpec.BooleanValue DISABLE_ANDESITE_ALLOY_RECIPES;
     public static final ForgeConfigSpec.BooleanValue DISABLE_COGWHEEL_RECIPES;
     public static final ForgeConfigSpec.BooleanValue DISABLE_ANDESITE_CASING_RECIPES;
+    public static final ForgeConfigSpec.BooleanValue DISABLE_MACHINE_RECIPES;
     public static final ForgeConfigSpec.BooleanValue SHOW_LOST_TECH_TOOLTIP;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CUSTOM_DISABLED_OUTPUT_ITEMS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CUSTOM_DISABLED_INGREDIENTS;
@@ -39,6 +40,11 @@ public class ModConfig {
                 .comment("Whether to disable recipes that produce Andesite Casing OR require Andesite Casing as an ingredient.",
                         "安山岩ケーシング自体のクラフト、および安山岩ケーシングを材料とするすべてのレシピを無効化するかどうか。")
                 .define("disableAndesiteCasingRecipes", true);
+
+        DISABLE_MACHINE_RECIPES = builder
+                .comment("Whether to disable crafting recipes for all Create kinetic machines (Mechanical Press, Mixer, Saw, Drill, Harvester, etc.).",
+                        "Createの主要な機械（メカニカルプレス、ミキサー、ノコギリ、ドリル、収穫機等）自体のクラフトレシピを無効化するかどうか。")
+                .define("disableMachineRecipes", true);
 
         SHOW_LOST_TECH_TOOLTIP = builder
                 .comment("Whether to show a 'Lost Technology' tooltip on items that cannot be crafted.",
