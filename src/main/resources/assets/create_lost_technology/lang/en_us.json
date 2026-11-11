@@ -1,0 +1,9 @@
+{
+  "tooltip.create_lost_technology.lost_tech_header": "§6[Create is Lost Technology]",
+  "tooltip.create_lost_technology.lost_tech_desc": "Lost Technology: This item cannot be crafted. You must discover it in chests or ancient structures.",
+  "config.create_lost_technology.disableZincOre": "Disable Zinc Ore Generation",
+  "config.create_lost_technology.disableAndesiteAlloyRecipes": "Disable Andesite Alloy Recipes",
+  "config.create_lost_technology.disableCogwheelRecipes": "Disable Cogwheel Recipes",
+  "config.create_lost_technology.disableAndesiteCasingRecipes": "Disable Andesite Casing Recipes",
+  "config.create_lost_technology.showLostTechTooltip": "Show Lost Technology Tooltip"
+}

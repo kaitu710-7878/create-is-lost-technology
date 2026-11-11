@@ -1,0 +1,9 @@
+{
+  "tooltip.create_lost_technology.lost_tech_header": "§6[Create is Lost Technology]",
+  "tooltip.create_lost_technology.lost_tech_desc": "失われた技術: このアイテムはクラフトできません。チェストや遺跡から見つける必要があります。",
+  "config.create_lost_technology.disableZincOre": "亜鉛鉱石の生成を無効化",
+  "config.create_lost_technology.disableAndesiteAlloyRecipes": "安山岩合金レシピを無効化",
+  "config.create_lost_technology.disableCogwheelRecipes": "歯車レシピを無効化",
+  "config.create_lost_technology.disableAndesiteCasingRecipes": "安山岩ケーシングレシピを無効化",
+  "config.create_lost_technology.showLostTechTooltip": "失われた技術ツールチップを表示"
+}
