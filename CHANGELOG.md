@@ -4,6 +4,25 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.3-beta] - 2026-11-11
+
+### English
+#### Fixed
+- **Fixed Missing Tags on Chassis and Gantry Shafts**:
+  - Radial Chassis, Linear Chassis, Gantry Shafts, and Gantry Carriages require Andesite Alloy as an ingredient.
+  - Added comprehensive ingredient scanning for Andesite Alloy and Cogwheels in addition to Andesite Casing.
+  - Added Radial Chassis, Linear Chassis, Gantry Shafts, and Gantry Carriages to the `KINETIC_MACHINES` blacklist set and recipe ID filter, ensuring they are cleanly removed from RecipeManager and JEI.
+
+---
+
+### 日本語
+#### 修正
+- **ラジアルシャーシおよびガントリーシャフト等のミッシングタグ問題を解消**:
+  - ラジアルシャーシ、リニアシャーシ、ガントリーシャフト、ガントリーキャリッジ等は素材に「安山岩合金」を使用しているため、素材検査処理に安山岩合金（および歯車）の検出処理を完全追加。
+  - シャーシおよびガントリー系アイテムを動力機械・伝達部品セット（`KINETIC_MACHINES`）およびIDフィルターに追加し、RecipeManagerおよびJEIから確実に完全消去されるよう修正。
+
+---
+
 ## [1.0.2-beta] - 2026-11-11
 
 ### English
