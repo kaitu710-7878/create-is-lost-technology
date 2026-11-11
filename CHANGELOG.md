@@ -4,7 +4,7 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
-## [1.0.6-beta] - 2026-11-11
+## [1.0.6] - 2026-11-12 (Release)
 
 ### English
 #### Changed & Redesigned
