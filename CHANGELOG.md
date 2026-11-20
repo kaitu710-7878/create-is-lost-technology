@@ -4,6 +4,32 @@ All notable changes to `Create is Lost Technology` will be documented in this fi
 
 ---
 
+## [1.0.7-beta] - 2026-11-20
+
+### English
+#### Fixed & Simplified
+- **Fixed Unintended Removal of Vanilla & Other Mod Recipes (e.g., Logs to Planks)**:
+  - Removed the `hasEmptyOrMissingIngredient` scanner and `purgeBrokenRecipes` option, which inadvertently treated empty crafting grid slots (`Ingredient.EMPTY`) and early unbound tags during `RecipeManager.apply` as broken ingredients, removing standard recipes like Logs → Planks.
+- **Strictly Scoped Filtering**:
+  - Removed excessive hardcoded machine lists and broad recipe ID prefix matching (`KINETIC_MACHINES`, `crafting/kinetics/mechanical_*`).
+  - Recipe disabling is now strictly scoped to the core targets: **Andesite Alloy**, **Cogwheels**, **Andesite Casing**, and **recipes that require Andesite Casing as an ingredient**.
+- **Safe Post-Tag-Bind Execution (`ServerEvents`)**:
+  - Replaced `RecipeManagerMixin` (`apply`/`replaceRecipes`) with `ServerStartedEvent` and `OnDatapackSyncEvent` so recipe filtering runs strictly after all tags are fully bound, preventing tag cache corruption.
+
+---
+
+### 日本語
+#### 修正・シンプル化
+- **バニラおよび他MODレシピ（原木→木材など）が誤って削除される不具合を修正**:
+  - 作業台の空きスロット（`Ingredient.EMPTY`）や `RecipeManager.apply` 時点の未バインドタグを破損素材として誤判定し、原木から木材などの通常レシピまで消滅させていた `hasEmptyOrMissingIngredient` ロジックおよび `purgeBrokenRecipes` を完全に削除。
+- **無効化対象の厳密な絞り込み**:
+  - 過剰なハードコード機械リスト（`KINETIC_MACHINES`）や広範なレシピID前方一致判定を削除。
+  - 無効化対象を本来必要な「**安山岩合金**」「**歯車**」「**安山岩ケーシング**」「**安山岩ケーシングを素材とする機械・レシピ**」（および亜鉛鉱石生成停止）のみに厳密に限定。
+- **タグ確定後の安全なフィルタリング実行 (`ServerEvents`)**:
+  - `RecipeManagerMixin` によるロード途中での早期介入を廃止し、全タグのバインド完了後に発火する `ServerStartedEvent` および `OnDatapackSyncEvent` で実行する設計へ変更。タグキャッシュ汚染による不具合を根絶。
+
+---
+
 ## [1.0.6] - 2026-11-12 (Release)
 
 ### English
